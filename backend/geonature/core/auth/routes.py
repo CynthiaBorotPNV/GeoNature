@@ -19,9 +19,12 @@ from flask import (
     session,
     Response,
 )
+from flask_login import login_user
+import sqlalchemy as sa
 from sqlalchemy import select
 from utils_flask_sqla.response import json_resp
 
+from pypnusershub.db import models
 from pypnusershub.db.models import User, Organisme, Application
 from pypnusershub.db.tools import encode_token
 from pypnusershub.routes import insert_or_update_organism, insert_or_update_role
@@ -112,6 +115,15 @@ def loginCas():
                 "id_organisme": organism_id,
             }
             response.set_cookie("current_user", str(current_user), expires=cookie_exp)
+
+            # Log the user in
+            user = db.session.execute(
+                sa.select(models.User)
+                .where(models.User.identifiant == current_user["user_login"])
+                .where(models.User.filter_by_app())
+            ).scalar_one()
+            login_user(user)
+            
             return response
         else:
             log.info("Erreur d'authentification lié au CAS, voir log du CAS")
