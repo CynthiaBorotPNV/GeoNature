@@ -3,6 +3,7 @@ import { UntypedFormGroup } from '@angular/forms';
 
 import { CommonService } from '@geonature_common/service/common.service';
 
+import { CookieService } from 'ng2-cookies';
 import { AuthService } from '../../../components/auth/auth.service';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
@@ -35,7 +36,8 @@ export class LoginComponent implements OnInit {
     private moduleService: ModuleService,
     private router: Router,
     private route: ActivatedRoute,
-    private _routingService: RoutingService
+    private _routingService: RoutingService,
+    private _cookie: CookieService
   ) {
     this.enablePublicAccess = this.config.PUBLIC_ACCESS_USERNAME;
     this.APP_NAME = this.config.appName;
@@ -50,9 +52,9 @@ export class LoginComponent implements OnInit {
     if (this.config.CAS_PUBLIC.CAS_AUTHENTIFICATION) {
       // if token not here here, redirection to CAS login page
       const url_redirection_cas = `${this.config.CAS_PUBLIC.CAS_URL_LOGIN}?service=${this.config.API_ENDPOINT}/gn_auth/login_cas`;
-      if (!this._authService.isAuthenticated()) {
+      if (!this._authService.isLoggedIn()) {
         // TODO: set the local storage item 'expires_at' in the API route "gn_auth/login_cas"
-        localStorage.setItem('expires_at', moment().add(1, 'days').toISOString());
+        //localStorage.setItem('gn_expires_at', moment().add(1, 'days').toISOString());
         document.location.href = url_redirection_cas;
       }
     }

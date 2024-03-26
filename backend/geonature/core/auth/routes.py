@@ -97,7 +97,11 @@ def loginCas():
                 .id_application
             )
             token = encode_token(data)
-            response.set_cookie("token", str(token), expires=cookie_exp)
+            # response.set_cookie("gn_id_token", str(token), expires=cookie_exp)
+
+            token_exp = datetime.datetime.now(datetime.timezone.utc)
+            token_exp += datetime.timedelta(seconds=current_app.config["COOKIE_EXPIRATION"])
+            # response.set_cookie("gn_expires_at", token_exp.isoformat(), expires=cookie_exp)
 
             # User cookie
             organism_id = info_user["codeOrganisme"]
@@ -114,7 +118,7 @@ def loginCas():
                 "id_role": data["id_role"],
                 "id_organisme": organism_id,
             }
-            response.set_cookie("current_user", str(current_user), expires=cookie_exp)
+            # response.set_cookie("gn_current_user", str(current_user), expires=cookie_exp)
 
             # Log the user in
             user = db.session.execute(
@@ -123,7 +127,10 @@ def loginCas():
                 .where(models.User.filter_by_app())
             ).scalar_one()
             login_user(user)
-            
+
+            # from pypnusershub.routes import login
+            # login()
+
             return response
         else:
             log.info("Erreur d'authentification lié au CAS, voir log du CAS")
