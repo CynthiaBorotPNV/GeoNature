@@ -176,7 +176,6 @@ class CasAuthentificationError(GeonatureApiError):
 #     auth_manager.set_auth_provider("cas_inpn", AuthenficationCASINPN)
 
 auth_manager.add_provider(
-    "gn_ecrins",
     ExternalGNAuthProvider(base_url="https://geonature.ecrins-parcnational.fr", id_group=2),
 )
 
