@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
   form: UntypedFormGroup;
   login_or_pass_recovery: boolean = false;
   public APP_NAME = null;
+  public authProviders: Array<string>;
 
   constructor(
     public _authService: AuthService, //FIXME : change to private (html must be modified)
@@ -44,17 +45,20 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.config.AUTHENTIFICATION_CONFIG.EXTERNAL_PROVIDER) {  
+    if (this.config.AUTHENTIFICATION_CONFIG.EXTERNAL_PROVIDER) {
       this._authService.getLoginExternalProviderUrl().subscribe((url) => {
-        document.location.href = url
-      })
+        document.location.href = url;
+      });
     }
+    this._authService.getAuthProviders().subscribe((providers) => {
+      this.authProviders = providers;
+    });
   }
 
-  async register(user) {
+  async register(form) {
     this._authService.enableLoader();
     const data = await this._authService
-      .signinUser(user)
+      .signinUser(form)
       .toPromise()
       .catch(() => {
         this._authService.handleLoginError();
