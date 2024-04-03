@@ -1,3 +1,33 @@
+from flask import Response, current_app
+from geonature.utils.config import config
+
+from geonature.core.auth.providers import ExternalGNAuthProvider
+from pypnusershub.auth import Authentication, AuthenticationMeta
+from pypnusershub.db.models import User
+
+
+class ExternalEcrinsAuthProvider(ExternalGNAuthProvider):
+    login_url = "llalala"
+
+
+class ExternalCBNAAuthProvider(ExternalGNAuthProvider):
+    login_url = "llalala"
+
+
+class CasINPNAuthentification(Authentication):
+    login_url = config["URL_APPLICATION"]
+    is_external = True
+    logo = "lala"
+    label = "CAS"
+
+    #  ...
+    def authenticate(self, *args, **kwargs):
+        pass
+
+
+# CasINPNAuthentification.lo
+
+
 import datetime
 import logging
 from typing import Any, Union
@@ -8,7 +38,7 @@ from flask import Response, current_app, jsonify, make_response, redirect, rende
 from geonature.utils import utilsrequests
 from geonature.utils.errors import GeonatureApiError
 from geonature.core.auth.providers import ExternalGNAuthProvider
-from pypnusershub.auth import auth_manager, Authentication
+from pypnusershub.auth import Authentication
 from pypnusershub.db import db, models
 from pypnusershub.db.tools import encode_token
 from pypnusershub.routes import insert_or_update_organism, insert_or_update_role
@@ -33,13 +63,13 @@ CAS_PUBLIC = dict(
     URL_LOGOUT="https://inpn.mnhn.fr/auth/logout",
     URL_VALIDATION="https://inpn.mnhn.fr/auth/serviceValidate",
 )
-from .custom_bis import user_cs, pw
+from geonature.custom_bis import user_cs, pw
 
 CAS_USER_WS = dict(
     URL="https://inpn.mnhn.fr/authentication/information",
     BASE_URL="https://inpn.mnhn.fr/authentication/",
-    ID=user_cs,
-    PASSWORD=pw,
+    ID="",
+    PASSWORD="",
 )
 USERS_CAN_SEE_ORGANISM_DATA = False
 
@@ -54,6 +84,7 @@ def get_user_from_id_inpn_ws(id_user):
                 CAS_USER_WS["PASSWORD"],
             ),
         )
+        print("RESPPP", response.status_code)
         assert response.status_code == 200
         return response.json()
     except AssertionError:
@@ -102,32 +133,29 @@ def insert_user_and_org(info_user):
 
 
 class AuthenficationCASINPN(Authentication):
+    id_provider = "cas_inpn"
+    label = "CAS INPN"
+    is_external = True
+    is_uh = False
 
-    def __init__(self) -> None:
+    @property
+    def login_url(self):
+        gn_api = current_app.config["API_ENDPOINT"]
+        base_url = CAS_PUBLIC["URL_LOGIN"]
+        return f"{CAS_PUBLIC['URL_LOGIN']}?service={gn_api+'/auth/login/cas_inpn'}"
 
-        def login():
-            gn_api = current_app.config["API_ENDPOINT"]
-            base_url = CAS_PUBLIC["URL_LOGIN"]
-            return f"{CAS_PUBLIC['URL_LOGOUT']}?service={auth_manager.home_page}"
-
-        def logout():
-            gn_api = current_app.config["API_ENDPOINT"]
-            base_url = CAS_PUBLIC["URL_LOGIN"]
-            return f"{base_url}?service={gn_api}/auth/login"
-
-        super().__init__(
-            "cas_inpn",
-            login_url=property(login),
-            logout_url=property(logout),
-            is_external=True,
-            is_uh=False,
-            label="Cas INPN",
-        )
+    @property
+    def logout_url(self):
+        gn_api = current_app.config["API_ENDPOINT"]
+        base_url = CAS_PUBLIC["URL_LOGOUT"]
+        return f"{base_url}?service={gn_api}/auth/logout"
 
     def authenticate(self, *args, **kwargs) -> Union[Response, models.User]:
+        print("ARGS AUTH", request.args)
         params = request.args
         if "ticket" in params:
-            base_url = current_app.config["API_ENDPOINT"] + "/auth/login"
+            print("TOTOTOOOOOOI")
+            base_url = current_app.config["API_ENDPOINT"] + "/auth/login/cas_inpn"
             url_validate = "{url}?ticket={ticket}&service={service}".format(
                 url=CAS_PUBLIC["URL_VALIDATION"],
                 ticket=params["ticket"],
@@ -184,12 +212,9 @@ class AuthenficationCASINPN(Authentication):
         pass
 
 
-if CAS_AUTHENTIFICATION:
-    auth_manager.add_provider(AuthenficationCASINPN())
-
-# auth_manager.add_provider(
-#     "gn_ecrins",
-#     ExternalGNAuthProvider(base_url="https://geonature.ecrins-parcnational.fr", id_group=2),
-# )
-
 # Accueil : https://ginco2-preprod.mnhn.fr/ (URL publique) + http://ginco2-preprod.patnat.mnhn.fr/ (URL privée)
+
+
+AUTHENTICATION_CLASS = [
+    AuthenficationCASINPN,
+]

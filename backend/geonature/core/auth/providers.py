@@ -9,13 +9,9 @@ from pypnusershub.db.models import User
 
 
 class ExternalGNAuthProvider(Authentication):
-    def __init__(self, base_url, id_group):
-        self.base_url = base_url
-        self.id_group = id_group
 
     def authenticate(self):
         params = request.json
-        print(self.base_url)
         url = self.base_url + "/api/auth/login"
         login_response = requests.post(
             url,
@@ -45,6 +41,3 @@ class ExternalGNAuthProvider(Authentication):
 
     def revoke(self):
         pass
-
-    def get_provider_url(self) -> str:
-        return ""

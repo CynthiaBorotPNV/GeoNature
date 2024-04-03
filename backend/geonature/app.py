@@ -6,6 +6,7 @@ import logging, warnings, os, sys
 from itertools import chain
 from importlib import import_module
 from packaging import version
+from pathlib import Path
 
 if sys.version_info < (3, 10):
     from importlib_metadata import entry_points
@@ -33,7 +34,7 @@ else:  # retro-compatibility SQLAlchemy 1.3
 
 from geonature.utils.config import config
 
-from geonature.utils.env import MAIL, DB, db, MA, migrate, BACKEND_DIR
+from geonature.utils.env import MAIL, DB, db, MA, migrate, BACKEND_DIR, ROOT_DIR
 from geonature.utils.logs import config_loggers
 from geonature.utils.module import iter_modules_dist
 from geonature.core.admin.admin import admin
@@ -47,6 +48,8 @@ from pypnusershub.db.tools import (
 from pypnusershub.db.models import Application
 from pypnusershub.auth import auth_manager
 from pypnusershub.login_manager import login_manager
+
+logger = logging.getLogger()
 
 
 @migrate.configure
@@ -89,6 +92,9 @@ class MyJSONProvider(DefaultJSONProvider):
         return DefaultJSONProvider.default(o)
 
 
+from werkzeug.utils import ImportStringError
+
+
 def create_app(with_external_mods=True):
     app = Flask(
         __name__.split(".")[0],
@@ -98,6 +104,19 @@ def create_app(with_external_mods=True):
         template_folder="geonature/templates",
     )
     app.config.update(config)
+
+    # load custom config from python file
+    with app.app_context():
+        try:
+            path = f"{ROOT_DIR}/config/custom.py"
+            if "GEONATURE_SETTINGS" in os.environ:
+                path = os.environ["GEONATURE_SETTINGS"]
+            if Path(path).is_file():
+                app.config.from_pyfile(path)
+            else:
+                app.config.from_object(path)
+        except (ImportStringError, OSError) as e:
+            logger.debug(f"No custom config found... continue : {e.msg}")
     auth_manager.init_app(app)
     auth_manager.home_page = config["URL_APPLICATION"]
 

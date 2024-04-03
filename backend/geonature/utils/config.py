@@ -22,8 +22,6 @@ __all__ = ["config", "config_frontend"]
 # Load config from GEONATURE_* env vars and from GEONATURE_SETTINGS python module (if any)
 config_programmatic = Config(get_root_path("geonature"))
 config_programmatic.from_prefixed_env(prefix="GEONATURE")
-if "GEONATURE_SETTINGS" in os.environ:
-    config_programmatic.from_object(os.environ["GEONATURE_SETTINGS"])
 
 # Load toml file and override with env & py config
 config_toml = load_toml(CONFIG_FILE) if CONFIG_FILE else {}
