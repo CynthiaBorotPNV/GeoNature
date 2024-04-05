@@ -82,6 +82,7 @@
                       <a
                         *ngIf="provider.is_uh"
                         class="btn btn-success"
+                        [href]="getProviderLoginUrl(provider.id_provider)"
                       >
                         Se connecter sur {{ provider.logo }}{{ provider.label }}
                       </a>
@@ -91,11 +92,11 @@
                     <p>Login with other providers</p>
                     <ng-container *ngFor="let provider of authProviders">
                       <a
-                        [href]="provider.login_url"
+                        [href]="getProviderLoginUrl(provider.id_provider)"
                         *ngIf="!provider.is_uh"
-                        class="btn btn-primary"
+                        class="btn btn-primary rounded"
                       >
-                        Se connecter sur {{ provider.logo }}{{ provider.label }}
+                      <span [innerHTML]="provider.logo | safeHTML"></span> Se connecter sur {{ provider.label }}
                       </a>
                     </ng-container>
                   </div>
