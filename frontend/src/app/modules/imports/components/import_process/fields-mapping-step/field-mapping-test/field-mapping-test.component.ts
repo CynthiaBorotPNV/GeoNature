@@ -83,6 +83,7 @@ export class FieldMappingTestComponent implements OnInit {
       this._fieldMappingService.mappingFormGroup.dirty &&
       (this.cruved.C || (mappingValue && mappingValue.cruved.U && !mappingValue.public)) //
     ) {
+      console.log("PUBBBBLLIIICCn",mappingValue.public)
       if (mappingValue && !mappingValue.public) {
         this.updateAvailable = true;
         this.modalCreateMappingForm.setValue(mappingValue.label);
@@ -179,6 +180,24 @@ export class FieldMappingTestComponent implements OnInit {
     // this.spinner = true;
     this._importDataService
       .createFieldMapping(this.modalCreateMappingForm.value, this.getFieldMappingValues())
+      .pipe()
+      .subscribe(
+        () => {
+          this.processNextStep();
+        },
+        () => {
+          // this.spinner = false;
+        }
+      );
+  }
+  updateMapping() {
+    // this.spinner = true;
+    let name = '';
+    if (this.modalCreateMappingForm.value != this._fieldMappingService.mappingSelectionFormControl.value.label) {
+      name = this.modalCreateMappingForm.value;
+    }
+    this._importDataService
+      .updateFieldMapping(this._fieldMappingService.mappingSelectionFormControl.value.id, this.getFieldMappingValues(), name)
       .pipe()
       .subscribe(
         () => {
