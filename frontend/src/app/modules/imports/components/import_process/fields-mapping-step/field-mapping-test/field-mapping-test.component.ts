@@ -83,7 +83,6 @@ export class FieldMappingTestComponent implements OnInit {
       this._fieldMappingService.mappingFormGroup.dirty &&
       (this.cruved.C || (mappingValue && mappingValue.cruved.U && !mappingValue.public)) //
     ) {
-      console.log("PUBBBBLLIIICCn",mappingValue.public)
       if (mappingValue && !mappingValue.public) {
         this.updateAvailable = true;
         this.modalCreateMappingForm.setValue(mappingValue.label);
