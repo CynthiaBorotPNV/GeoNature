@@ -172,7 +172,7 @@ export class FieldMappingService {
    *
    */
   populateMappingForm() {
-    const classic_behavior = (vc,name_field) => {
+    const classic_behavior = (vc, name_field) => {
       if (!(name_field in this.fieldMappingStatus.mapped)) {
         this.onFieldMappingChange(name_field, vc);
       } else {
@@ -192,14 +192,14 @@ export class FieldMappingService {
           control = this.mappingFormGroup.controls[name_field];
         }
         control.valueChanges.subscribe((vc) => {
-          classic_behavior(vc,name_field);
-        })
+          classic_behavior(vc, name_field);
+        });
 
         this.mappingFormGroup.addControl(name_field, control);
         /**
          * MANDATORY CONDITIONS
          */
-        
+
         if (mandatory_conditions !== null && !mandatory) {
           this.mappingFormGroup
             .get(name_field)
@@ -208,7 +208,7 @@ export class FieldMappingService {
             );
           mandatory_conditions.forEach((mandatory_condition) => {
             this.mappingFormGroup.get(mandatory_condition).valueChanges.subscribe((vc) => {
-              classic_behavior(vc,name_field);
+              classic_behavior(vc, name_field);
               this.mappingFormGroup.get(name_field).updateValueAndValidity();
             });
           });
@@ -224,14 +224,14 @@ export class FieldMappingService {
             );
           optional_conditions.forEach((mandatory_condition) => {
             this.mappingFormGroup.get(mandatory_condition).valueChanges.subscribe((vc) => {
-              classic_behavior(vc,name_field);
+              classic_behavior(vc, name_field);
               this.mappingFormGroup.get(name_field).updateValueAndValidity();
             });
           });
         }
       }
     );
-    
+
     this.currentFieldMapping.subscribe((fieldMapping) => {
       this.fieldMappingStatus = {
         mapped: new Set<string>(),
